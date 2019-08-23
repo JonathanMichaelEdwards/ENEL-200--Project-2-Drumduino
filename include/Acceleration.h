@@ -11,8 +11,8 @@
     Accelerometer    -        Arduino       
     VCC              ->       5V
     GND              ->       GND
-    SCL              ->       SCL (top left corner)
-    SDA              ->       SDA (top left corner + 1)
+    SCL              ->       A5
+    SDA              ->       A4
 
     # note:
         - Other pins are NOT CONNECTED

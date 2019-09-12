@@ -7,7 +7,8 @@
         "mpu_9250.h": "c",
         "arduino.h": "c",
         "acceleration.h": "c",
-        "wire.h": "c"
+        "wire.h": "c",
+        "uart.h": "c"
     },
     "C_Cpp.dimInactiveRegions": false
 }

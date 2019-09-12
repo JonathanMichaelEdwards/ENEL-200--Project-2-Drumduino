@@ -1,100 +1,97 @@
 // ****************************************************************************
 // File:     Acceleration.c                                                   *
 // Authors:  Jonathan Edwards                                                 *
-// Date:     ...                                                              *
-// Descr:    ...                                                              *
+// Date:     12/09/2019                                                       *
+// Descr:    Accelerometer setup                                              *
 // ****************************************************************************
 
 
 #include "Acceleration.h"
 #include "MPU_9250.h"
+#include "uart.h"
 
 #define SENSOR_ADDRESS 0x68
+
 
 MPU9250 IMU(Wire, SENSOR_ADDRESS);  // Using MPU9250 sensor lib
 
 
+/*
+ * Getting I2C data from the accelerometer.
+ * # note: sometimes X and Y directions are flipped due to board.
+ */
 Direction dirAccel()
 {
     Direction dir = {0};
 
-    dir.accX = IMU.getAccelX_mss();
-    dir.accY = IMU.getAccelY_mss();
-    dir.accZ = IMU.getAccelZ_mss();
+    dir.accX = (int16_t)IMU.getAccelY_mss();
+    dir.accY = (int16_t)IMU.getAccelX_mss();
+    dir.accZ = (int16_t)IMU.getAccelZ_mss();
 
     return dir;
 }
-
 
 Gyro gyroAccel()
 {
     Gyro dir = {0};
 
-    dir.accX = IMU.getGyroX_rads();
-    dir.accY = IMU.getGyroY_rads();
-    dir.accZ = IMU.getGyroZ_rads();
+    dir.accX = (int16_t)IMU.getGyroY_rads();
+    dir.accY = (int16_t)IMU.getGyroX_rads();
+    dir.accZ = (int16_t)IMU.getGyroZ_rads();
 
     return dir;
 }
-
 
 Magnitude magAccel()
 {
     Magnitude dir = {0};
 
-    dir.accX = IMU.getMagX_uT();
-    dir.accY = IMU.getMagY_uT();
-    dir.accZ = IMU.getMagZ_uT();
+    dir.accX = (int16_t)IMU.getMagY_uT();
+    dir.accY = (int16_t)IMU.getMagX_uT();
+    dir.accZ = (int16_t)IMU.getMagZ_uT();
 
     return dir;
 }
 
 
-void runSensor()
+/*
+ * Initializes I2C.
+ */
+void accInit()
+{
+    // start communication
+    IMU.begin();
+
+    // setting the accelerometer full scale range to +/-8G 
+    IMU.setAccelRange(MPU9250::ACCEL_RANGE_16G);
+
+    // setting the gyroscope full scale range to +/-500 deg/s
+    IMU.setGyroRange(MPU9250::GYRO_RANGE_500DPS);
+
+    // setting DLPF bandwidth to 20 Hz
+    IMU.setDlpfBandwidth(MPU9250::DLPF_BANDWIDTH_184HZ);
+
+    IMU.setSrd(5);
+}
+
+
+/*
+ * I2C data is ready to transmit.
+ */
+void accRun()
 {
     IMU.readSensor();  // read the sensor
 } 
 
 
-void accInit()
-{
-    IMU.begin();
-}
-
-
+/*
+ * Displaying data.
+ */
 void printData(Direction dirAcc, Gyro gyroAcc, Magnitude magAcc)
 {
     // display the data
-    Serial.print("AccelX: ");
-    Serial.print(dirAcc.accX, 6);
-    Serial.print("	");
-    Serial.print("AccelY: ");  
-    Serial.print(dirAcc.accY, 6);
-    Serial.print("	");
-    Serial.print("AccelZ: ");  
-    Serial.println(dirAcc.accZ, 6);
-
-    Serial.print("GyroX: ");
-    Serial.print(gyroAcc.accX, 6);
-    Serial.print("	");
-    Serial.print("GyroY: ");  
-    Serial.print(gyroAcc.accY, 6);
-    Serial.print("	");
-    Serial.print("GyroZ: ");  
-    Serial.println(gyroAcc.accZ, 6);
-
-    Serial.print("MagX: ");  
-    Serial.print(magAcc.accX, 6);
-    Serial.print("	");  
-    Serial.print("MagY: ");
-    Serial.print(magAcc.accY, 6);
-    Serial.print("	");
-    Serial.print("MagZ: ");  
-    Serial.println(magAcc.accZ, 6);
-    
-    Serial.print("Temperature in C: ");
-    Serial.println(IMU.getTemperature_C(), 6);
-    Serial.println();
-
-    delay(500);
+    printf("AccelX: %d    AccelY: %d    AccelZ: %d    ", (int16_t)dirAcc.accX, (int16_t)dirAcc.accY, (int16_t)dirAcc.accZ);
+    printf("GyroX: %d    GyroY: %d    GyroZ: %d    ", (uint16_t)gyroAcc.accX, (uint16_t)gyroAcc.accY, (uint16_t)gyroAcc.accZ);
+    printf("MagX: %d    MagY: %d    MagZ: %d    ", (uint16_t)magAcc.accX, (uint16_t)magAcc.accY, (uint16_t)magAcc.accZ);
+    printf("Temp in celsius: %d\n", (uint16_t)(IMU.getTemperature_C()));
 }

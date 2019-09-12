@@ -1,8 +1,8 @@
 // ****************************************************************************
-// File:     Acceleration.c                                                   *
+// File:     Acceleration.h                                                   *
 // Authors:  Jonathan Edwards                                                 *
-// Date:     ...                                                              *
-// Descr:    ...                                                              *
+// Date:     12/09/2019                                                       *
+// Descr:    Accelerometer.h determines the usibility                         *
 // ****************************************************************************
 
 
@@ -22,33 +22,35 @@
 #ifndef ACCELERATION_H
 #define ACCELERATION_H
 
+extern "C" void uartInit(void);
 
 typedef struct DirAcc {
-    float accX;
-    float accY;
-    float accZ;
+    int accX;
+    int accY;
+    int accZ;
 } Direction;
 
 typedef struct GyroAcc {
-    float accX;
-    float accY;
-    float accZ;
+    int accX;
+    int accY;
+    int accZ;
 } Gyro;
 
 typedef struct MagAcc {
-    float accX;
-    float accY;
-    float accZ;
+    int accX;
+    int accY;
+    int accZ;
 } Magnitude;
 
+// Setup accelerometer functions
+void accInit(void);  // (put me in Setup)
+void accRun(void);   // (put me in loop to update reader)
 
+// Accelerometer Functions
 Direction dirAccel(void);
 Gyro gyroAccel(void);
 Magnitude magAccel(void);
 void printData(Direction, Gyro, Magnitude);
-
-void accInit(void);
-void runSensor(void);
 
 
 #endif  // ACCELERATION_H

@@ -63,15 +63,26 @@ void accInit()
     IMU.begin();
 
     // setting the accelerometer full scale range to +/-8G 
-    IMU.setAccelRange(MPU9250::ACCEL_RANGE_16G);
+    // IMU.setAccelRange(MPU9250::ACCEL_RANGE_2G);
+    // IMU.calibrateAccel();
 
-    // setting the gyroscope full scale range to +/-500 deg/s
-    IMU.setGyroRange(MPU9250::GYRO_RANGE_500DPS);
+    // // setting the gyroscope full scale range to +/-500 deg/s
+    // IMU.setGyroRange(MPU9250::GYRO_RANGE_500DPS);
+    // // IMU.calibrateGyro();
 
-    // setting DLPF bandwidth to 20 Hz
-    IMU.setDlpfBandwidth(MPU9250::DLPF_BANDWIDTH_184HZ);
+    // // setting DLPF bandwidth to 20 Hz
+    // IMU.setDlpfBandwidth(MPU9250::DLPF_BANDWIDTH_184HZ);
+    // // IMU.calibrateMag();
 
-    IMU.setSrd(5);
+    IMU.setSrd(9);
+
+    float ab = 0.01; // accel bias of 0.01 m/s/s
+    float as = 0.97; // accel scale factor of 0.97
+    IMU.setAccelCalX(ab,as);
+    
+    IMU.setAccelCalY(ab,as);
+
+    IMU.setAccelCalZ(ab,as);
 }
 
 

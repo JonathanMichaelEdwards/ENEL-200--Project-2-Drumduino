@@ -22,14 +22,15 @@ void setup()
 }
 
 
-int16_t storeDirY[15] = {0};
+int16_t storeDirZ[15] = {0};
 int16_t storeMagY[15] = {0};
 int16_t storeMagZ[15] = {0};
 int16_t minStoreMagZ[15] = {0};
-int16_t maxDirY = 0;
+int16_t maxDirZ = 0;
 int16_t maxMagY = 0;
 int16_t maxMagZ = 0;
 int16_t minMagZ = 0;
+int16_t prvMagX = 0;
 int index = 0;
 bool checkSound = false;
 bool up = true;
@@ -44,15 +45,16 @@ bool up = true;
  *      for everytime it is called (due to the
  *      break in the loop).
  */
-void storeAcc(int16_t dirY, int16_t magY, int16_t magZ)
+void storeAcc(int16_t dirZ, int16_t magY, int16_t magZ, int16_t dirX)
 {
     while (index < 10) {
         checkSound = false;
-        storeDirY[index] = dirY;
+        prvMagX = dirX;
+        storeDirZ[index] = dirZ;
         storeMagY[index] = magY;
         storeMagZ[index] = magZ;
 
-        if (maxDirY < dirY) maxDirY = storeDirY[index];
+        if (maxDirZ < dirZ) maxDirZ = storeDirZ[index];
         if (maxMagY > magY) maxMagY = storeMagY[index];
         if (maxMagZ < magZ) maxMagZ = storeMagZ[index];
         // if (!(minMagZ < magZ)) minMagZ = minStoreMagZ[index];
@@ -65,16 +67,18 @@ void storeAcc(int16_t dirY, int16_t magY, int16_t magZ)
 void playNote(bool range, int freq, int16_t gyro)
 {
     if (checkSound) {
-        if (maxMagZ >= -100 && range) {
-            if (maxDirY >= 15  && gyro < 0) {
+        // if (maxMagZ <= -70 && range) {
+            if (maxDirZ  <= -100 && gyro < 0 && range) {
                 // tone(12, 300, 30);
                 tone(12, freq, 50);
                 checkSound = false;
-            }
+            // }
         }
     }
 }
 
+boolean letsgo = false;
+long totalgyro = 0;
 
 void loop() 
 {
@@ -85,12 +89,41 @@ void loop()
     Magnitude magAcc = magAccel();
 
 
-    storeAcc(dirAcc.accY, magAcc.accY, magAcc.accZ);
+    //storeAcc(dirAcc.accZ, magAcc.accY, magAcc.accZ, dirAcc.accX);
 
+    //printData(dirAcc, gyroAcc, magAcc);
+    
+    if (dirAcc.accZ <= -15 && !letsgo) {
+        int note = 1;
+        if (dirAcc.accX > 10) {
+            note = 2;
+        } else if (dirAcc.accX < -10) {
+            note = 3;
+        }
+        //printf("YESSSS %d\n", note);
+        tone(12, 100 * note, 50);
+        letsgo = true;
+    } else {
+        //printf("nooooo %ld\n", totalgyro);
+    }
+
+    if (dirAcc.accZ >= 2 && letsgo) {
+        letsgo = false;
+    }
+/*
+    totalgyro += gyroAcc.accX;
+
+    if (totalgyro > 0 && totalgyro < 400) {
+        totalgyro -= 1;
+    } else if (totalgyro < 0 && totalgyro > -400) {
+        totalgyro += 1;
+    }
+    //*/
+    // printf("%d %d\n", prvMagX, dirAcc.accX);
     // printf("%d\n", 65 <= magAcc.accX && magAcc.accX < 80);
-    playNote(80 <= magAcc.accX && magAcc.accX <= 110, 100, gyroAcc.accX);
-    playNote(50 <= magAcc.accX && magAcc.accX < 80, 200, gyroAcc.accX);
-    playNote(20 <= magAcc.accX && magAcc.accX < 50, 300, gyroAcc.accX);
+    // playNote(true, 100, gyroAcc.accX);                       // Play center
+    // playNote(prvMagX >= dirAcc.accX+20, 200, gyroAcc.accX);  // Play left
+    // playNote(20 <= magAcc.accX && magAcc.accX < 50, 300, gyroAcc.accX);
        
     // printf("y=%d z=%d\n", maxMagZ, magAcc.accZ);
     // printf("%d %d %d %d\n", magAcc.accX, magAcc.accY, gyroAcc.accX, gyroAcc.accY);
@@ -118,10 +151,10 @@ void loop()
         // }
         //  && minMagZ < -40
         for (int j  = 0; j < 10; j++) {
-            storeDirY[j] = storeMagZ[j] = storeMagY[j] = 0; 
+            storeDirZ[j] = storeMagZ[j] = storeMagY[j] = 0; 
             // minStoreMagZ[j] = magAcc.accZ;
         }
-        maxDirY = maxMagY = index = 0; 
+        maxDirZ = maxMagY = index = 0; 
         maxMagZ = magAcc.accZ;
     } else index++;
 
@@ -129,10 +162,10 @@ void loop()
 
     // if (dirAcc.accY < 0) dirAcc.accY *= -1;
 
-    // printf("%d %d %d\n", dirAcc.accY, magAcc.accZ, gyroAcc.accY);
+    // printf("%d\n", magAcc.accX);
     // run(dirAcc.accY, gyroAcc.accZ);
     // intensity level is measured in Newtons (F = M * A)
-    // printData(dirAcc, gyroAcc, magAcc);
+    
     
     // if (dirAcc.accX > 15 || dirAcc.accX < -15 && magAcc.accZ >= -80) puts("Play Sound for X"); 
     // if ((maxDirY > 15) && maxMagZ <= -80) puts("nothing");

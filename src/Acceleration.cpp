@@ -101,8 +101,8 @@ void accRun()
 void printData(Direction dirAcc, Gyro gyroAcc, Magnitude magAcc)
 {
     // display the data
-    // printf("AccelX: %d    AccelY: %d    AccelZ: %d    ", (int16_t)dirAcc.accX, (int16_t)dirAcc.accY, (int16_t)dirAcc.accZ);
-    // printf("GyroX: %d    GyroY: %d    GyroZ: %d    ", (uint16_t)gyroAcc.accX, (uint16_t)gyroAcc.accY, (uint16_t)gyroAcc.accZ);
+    printf("AccelX: %d    AccelY: %d    AccelZ: %d    ", (int16_t)dirAcc.accX, (int16_t)dirAcc.accY, (int16_t)dirAcc.accZ);
+    printf("GyroX: %d    GyroY: %d    GyroZ: %d    ", (uint16_t)gyroAcc.accX, (uint16_t)gyroAcc.accY, (uint16_t)gyroAcc.accZ);
     printf("MagX: %d    MagY: %d    MagZ: %d    \n", (uint16_t)magAcc.accX, (uint16_t)magAcc.accY, (uint16_t)magAcc.accZ);
-    // printf("Temp in celsius: %d\n", (uint16_t)(IMU.getTemperature_C()));
+    printf("Temp in celsius: %d\n", (uint16_t)(IMU.getTemperature_C()));
 }

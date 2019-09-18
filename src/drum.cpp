@@ -2,7 +2,7 @@
  * speaker_pcm
  *
  * Plays 8-bit PCM audio on pin 11 using pulse-width modulation (PWM).
- * For Arduino with Atmega168 at 16 MHz.
+ * For Arduino with Atmega168-328p at 16 MHz.
  *
  * Uses two timers. The first changes the sample value 8000 times a second.
  * The second holds pin 11 high for 0-255 ticks out of a 256-tick cycle,
@@ -50,16 +50,21 @@
  * sox audiodump.wav -c 1 -r 8000 -u -b macstartup-8000.wav
  */
 
-//#include "drum_data.h"
 
-#define LEDPIN 13
-#define SPEAKERPIN 11 // Fixed for pin 11
+#include <Arduino.h>
+#include <avr/interrupt.h>
+#include "drum.h"
+#include "drum_data.h"
+
+
 #define SAMPLE_RATE 8000
+
 
 volatile unsigned int maxSample = 0;
 volatile unsigned int currentSample = 0;
 
-void stopPlayback() {
+void stopPlayback() 
+{
   // Disable playback per-sample interrupt.
   TIMSK1 &= ~_BV(OCIE1A);
 
@@ -72,8 +77,10 @@ void stopPlayback() {
   digitalWrite(SPEAKERPIN, LOW);
 }
 
+
 // This is called at 8000 Hz to load the next sample.
-ISR(TIMER1_COMPA_vect) {
+ISR(TIMER1_COMPA_vect) 
+{
   if (currentSample >= maxSample) {
     OCR2A--; //Ramp down to avoid the click at the end
     if (OCR2A == 0) {
@@ -85,7 +92,10 @@ ISR(TIMER1_COMPA_vect) {
   }
   currentSample++;
 }
-void setupPlayback() {
+
+
+void setupPlayback() 
+{
   pinMode(SPEAKERPIN, OUTPUT);  //this line is 1/2 lines that matter
   // Set up Timer 2 to do pulse width modulation on the speaker
   // pin.
@@ -130,7 +140,9 @@ void setupPlayback() {
   sei();
 }
 
-void startPlayback(int drum) {
+
+void startPlayback(int drum) 
+{
   currentSample = 0;
   for (int i = 0; i < drum; i++) {
     currentSample += sizes[i];
@@ -162,22 +174,21 @@ void startPlayback(int drum) {
 }
 
 
-/*
-void setup() {
-  //Serial.begin(9600);
-  pinMode(LEDPIN, OUTPUT);
-  digitalWrite(LEDPIN, HIGH);
+// void setup() {
+//   //Serial.begin(9600);
+//   pinMode(LEDPIN, OUTPUT);
+//   digitalWrite(LEDPIN, HIGH);
 
   
-  setupPlayback();  //this is 2/2 line that matters
-}
+//   setupPlayback();  //this is 2/2 line that matters
+// }
 
-void loop() {
-  digitalWrite(LEDPIN, HIGH);
-  delay(1000);
-  digitalWrite(LEDPIN, LOW);
-  startPlayback(3);           //this is how you play a sound between 0-3 although i need to change them
-  delay(250);startPlayback(3);
-  delay(500);startPlayback(3);
-  delay(250);startPlayback(1);
-} // */
+// void loop() {
+//   digitalWrite(LEDPIN, HIGH);
+//   delay(1000);
+//   digitalWrite(LEDPIN, LOW);
+//   startPlayback(3);           //this is how you play a sound between 0-3 although i need to change them
+//   delay(250);startPlayback(3);
+//   delay(500);startPlayback(3);
+//   delay(250);startPlayback(1);
+// }

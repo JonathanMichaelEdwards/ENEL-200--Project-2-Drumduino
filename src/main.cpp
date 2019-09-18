@@ -20,7 +20,8 @@ void setup()
     uartInit();
     setupPlayback();
 
-    pinMode(12, 1);
+    pinMode(LEDPIN, OUTPUT);
+    digitalWrite(LEDPIN, HIGH);
 }
 
 /*
@@ -99,24 +100,36 @@ void loop()
 
     // printData(dirAcc, gyroAcc, magAcc);
     
-    bool detectMagY = (5 <= magAcc.accY && magAcc.accY <= 45);  // Y Magnitude offset (up and down playing motion region)
+    // bool detectMagY = (5 <= magAcc.accY && magAcc.accY <= 45);  // Y Magnitude offset (up and down playing motion region)
 
-    if (dirAcc.accZ <= -15 && !playingDrum && detectMagY) {
-        int note = 1;
-        if (dirAcc.accX > 10) {
-            note = 2;
-        } else if (dirAcc.accX < -10) {
-            note = 3;
-        }
-        // printf("YESSSS %d\n", note);
-        //tone(12, 100 * note, 50);
-        startPlayback(note);
-        playingDrum = true;
-    } 
+    // if (dirAcc.accZ <= -15 && !playingDrum && detectMagY) {
+    //     int note = 1;
+    //     // if (dirAcc.accX > 10) {
+    //     //     note = 2;
+    //     // } else if (dirAcc.accX < -10) {
+    //     //     note = 3;
+    //     // }
+    //     // printf("YESSSS %d\n", note);
+    //     //tone(12, 100 * note, 50);
+    //     startPlayback(note);
+    //     playingDrum = true;
+    // } 
 
-    if (dirAcc.accZ >= 2 && playingDrum) {
-        playingDrum = false;
-    }
+    // if (dirAcc.accZ >= 2 && playingDrum) {
+    //     playingDrum = false;
+    // }
+
+    digitalWrite(LEDPIN, HIGH);
+    delay(1000);
+    digitalWrite(LEDPIN, LOW);
+    
+    startPlayback(3);           //this is how you play a sound between 0-3 although i need to change them
+    delay(250);
+    startPlayback(3);
+    delay(500);
+    startPlayback(3);
+    delay(250);
+    startPlayback(1);
 
     
 

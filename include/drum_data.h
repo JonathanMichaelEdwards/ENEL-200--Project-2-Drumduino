@@ -9,6 +9,13 @@
 * Bits/Sample:    8
 **********************************************************************/
 
+
+#ifndef DRUM_DATA_H
+#define DRUM_DATA_H
+
+#include "drum_data.h"
+
+
 const unsigned int sizes[] = { 1267, 1765, 4011, 4821};
 
 const unsigned char data[] PROGMEM = {
@@ -1509,3 +1516,6 @@ const unsigned char data[] PROGMEM = {
 126, 126, 126, 126, 126, 126, 126, 126, // 4800-4807
 126, 126, 126, 126, 126, 126, 126, 126, // 4808-4815
 126, 126, 126, 126, 126};
+
+
+#endif // DRUM_DATA_H

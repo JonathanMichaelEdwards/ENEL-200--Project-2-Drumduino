@@ -9,7 +9,7 @@
 #include <Arduino.h>
 #include "Acceleration.h"
 #include "uart.h"
-
+#include "drum.h"
 
 /*
  * Sets up everything.
@@ -18,10 +18,12 @@ void setup()
 {
     accInit();
     uartInit();
+    setupPlayback();
+
     pinMode(12, 1);
 }
 
-
+/*
 int16_t storeDirZ[15] = {0};
 int16_t storeMagY[15] = {0};
 int16_t storeMagZ[15] = {0};
@@ -35,7 +37,7 @@ int16_t gyroOffset = 0;
 int index = 0;
 bool checkSound = false;
 bool gyroStable = false;
-
+// */
 
 /*
  *  Store a new acceleration value at the
@@ -46,6 +48,8 @@ bool gyroStable = false;
  *      for everytime it is called (due to the
  *      break in the loop).
  */
+
+/*
 void storeAcc(int16_t dirZ, int16_t magY, int16_t magZ, int16_t dirX)
 {
     while (index < 10) {
@@ -76,9 +80,10 @@ void playNote(bool range, int freq, int16_t gyro)
             // }
         }
     }
-}
+}//*/
 
-boolean letsgo = false;
+
+boolean playingDrum = false;
 int16_t totalgyro = 0;
 
 void loop() 
@@ -96,7 +101,7 @@ void loop()
     
     bool detectMagY = (5 <= magAcc.accY && magAcc.accY <= 45);  // Y Magnitude offset (up and down playing motion region)
 
-    if (dirAcc.accZ <= -15 && !letsgo && detectMagY) {
+    if (dirAcc.accZ <= -15 && !playingDrum && detectMagY) {
         int note = 1;
         if (dirAcc.accX > 10) {
             note = 2;
@@ -104,18 +109,19 @@ void loop()
             note = 3;
         }
         // printf("YESSSS %d\n", note);
-        tone(12, 100 * note, 50);
-        letsgo = true;
+        //tone(12, 100 * note, 50);
+        startPlayback(note);
+        playingDrum = true;
     } 
 
-    if (dirAcc.accZ >= 2 && letsgo) {
-        letsgo = false;
+    if (dirAcc.accZ >= 2 && playingDrum) {
+        playingDrum = false;
     }
 
     
 
 
-    
+    /*
     while (!gyroStable && gyroAcc.accX != 0) {
         // if (gyroAcc.accX < 0) totalgyro = -1;
         // else totalgyro = 1;
@@ -196,4 +202,5 @@ void loop()
    
     // if (dirAcc.accZ > 15 || dirAcc.accZ < -15) puts("Play Z"); 
     // puts("N"); 
+    // */
 } 

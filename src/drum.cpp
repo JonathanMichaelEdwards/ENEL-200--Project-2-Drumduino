@@ -50,7 +50,7 @@
  * sox audiodump.wav -c 1 -r 8000 -u -b macstartup-8000.wav
  */
 
-#include "drum_data.h"
+//#include "drum_data.h"
 
 #define LEDPIN 13
 #define SPEAKERPIN 11 // Fixed for pin 11
@@ -86,6 +86,7 @@ ISR(TIMER1_COMPA_vect) {
   currentSample++;
 }
 void setupPlayback() {
+  pinMode(SPEAKERPIN, OUTPUT);  //this line is 1/2 lines that matter
   // Set up Timer 2 to do pulse width modulation on the speaker
   // pin.
 
@@ -161,9 +162,9 @@ void startPlayback(int drum) {
 }
 
 
+/*
 void setup() {
   //Serial.begin(9600);
-  pinMode(SPEAKERPIN, OUTPUT);  //this line is 1/2 lines that matter
   pinMode(LEDPIN, OUTPUT);
   digitalWrite(LEDPIN, HIGH);
 
@@ -179,4 +180,4 @@ void loop() {
   delay(250);startPlayback(3);
   delay(500);startPlayback(3);
   delay(250);startPlayback(1);
-}
+} // */

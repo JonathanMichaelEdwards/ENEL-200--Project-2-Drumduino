@@ -31,9 +31,10 @@ int16_t maxMagY = 0;
 int16_t maxMagZ = 0;
 int16_t minMagZ = 0;
 int16_t prvMagX = 0;
+int16_t gyroOffset = 0;
 int index = 0;
 bool checkSound = false;
-bool up = true;
+bool gyroStable = false;
 
 
 /*
@@ -78,7 +79,7 @@ void playNote(bool range, int freq, int16_t gyro)
 }
 
 boolean letsgo = false;
-long totalgyro = 0;
+int16_t totalgyro = 0;
 
 void loop() 
 {
@@ -91,34 +92,57 @@ void loop()
 
     //storeAcc(dirAcc.accZ, magAcc.accY, magAcc.accZ, dirAcc.accX);
 
-    //printData(dirAcc, gyroAcc, magAcc);
+    // printData(dirAcc, gyroAcc, magAcc);
     
-    if (dirAcc.accZ <= -15 && !letsgo) {
+    bool detectMagY = (5 <= magAcc.accY && magAcc.accY <= 45);  // Y Magnitude offset (up and down playing motion region)
+
+    if (dirAcc.accZ <= -15 && !letsgo && detectMagY) {
         int note = 1;
         if (dirAcc.accX > 10) {
             note = 2;
         } else if (dirAcc.accX < -10) {
             note = 3;
         }
-        //printf("YESSSS %d\n", note);
+        // printf("YESSSS %d\n", note);
         tone(12, 100 * note, 50);
         letsgo = true;
-    } else {
-        //printf("nooooo %ld\n", totalgyro);
-    }
+    } 
 
     if (dirAcc.accZ >= 2 && letsgo) {
         letsgo = false;
     }
-/*
-    totalgyro += gyroAcc.accX;
 
+    
+
+
+    
+    while (!gyroStable && gyroAcc.accX != 0) {
+        // if (gyroAcc.accX < 0) totalgyro = -1;
+        // else totalgyro = 1;
+        totalgyro = gyroAcc.accX;
+        printf("%d\n", gyroAcc.accX);
+        gyroStable = true;
+    }
+
+    // while (!gyroStable) {
     if (totalgyro > 0 && totalgyro < 400) {
         totalgyro -= 1;
     } else if (totalgyro < 0 && totalgyro > -400) {
         totalgyro += 1;
     }
-    //*/
+    if (totalgyro <= -400) totalgyro += gyroAcc.accX;
+    else if (totalgyro >= 400) totalgyro -= gyroAcc.accX;
+    //     if (-100 <= totalgyro <= 100) gyroStable = false;
+    // }
+
+    // printf("%d\n", totalgyro);
+    // totalgyro += gyroAcc.accX;
+
+    // if (gyroAcc.accX > 0) totalgyro += gyroAcc.accX;
+    // else if (gyroAcc.accX <= 0) totalgyro -= gyroAcc.accX;
+
+    // totalgyro = gyroAcc.accX;
+
     // printf("%d %d\n", prvMagX, dirAcc.accX);
     // printf("%d\n", 65 <= magAcc.accX && magAcc.accX < 80);
     // playNote(true, 100, gyroAcc.accX);                       // Play center

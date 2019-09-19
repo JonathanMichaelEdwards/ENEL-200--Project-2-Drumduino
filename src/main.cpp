@@ -11,81 +11,71 @@
 #include "uart.h"
 #include "drum.h"
 
+
+int16_t storeMagX[30] = {0};
+int16_t maxMagX = 0;
+int16_t minMagX = 0;
+int16_t addLimit = 0;
+int16_t offsetMagX = 0;
+int16_t offsetMagY = 0;
+uint8_t pullDownValue = 0;
+bool playingDrum = false;
+bool ready = false;
+int index = 0;
+
+
 /*
  * Sets up everything.
  */
 void setup()
-{
+{   
     accInit();
     uartInit();
     setupPlayback();
 
-    pinMode(LEDPIN, OUTPUT);
-    digitalWrite(LEDPIN, HIGH);
-}
+    // // puts("Please callibrate the accelerometer by rotating it 360 degrees. Hit the button when done.");
+    // while (1) {
+    //     if (PINB & BIT(4)) {  // pull down resistor
+    //         puts("Callibration Succesful, Getting ready to play, please wait...");
+    //         break;
+    //     }
+    // }
 
-/*
-int16_t storeDirZ[15] = {0};
-int16_t storeMagY[15] = {0};
-int16_t storeMagZ[15] = {0};
-int16_t minStoreMagZ[15] = {0};
-int16_t maxDirZ = 0;
-int16_t maxMagY = 0;
-int16_t maxMagZ = 0;
-int16_t minMagZ = 0;
-int16_t prvMagX = 0;
-int16_t gyroOffset = 0;
-int index = 0;
-bool checkSound = false;
-bool gyroStable = false;
-// */
-
-/*
- *  Store a new acceleration value at the
- *  index of the array for every time this
- *  function is called.
- *  # note:
- *    - This functon only loops through once
- *      for everytime it is called (due to the
- *      break in the loop).
- */
-
-/*
-void storeAcc(int16_t dirZ, int16_t magY, int16_t magZ, int16_t dirX)
-{
-    while (index < 10) {
-        checkSound = false;
-        prvMagX = dirX;
-        storeDirZ[index] = dirZ;
-        storeMagY[index] = magY;
-        storeMagZ[index] = magZ;
-
-        if (maxDirZ < dirZ) maxDirZ = storeDirZ[index];
-        if (maxMagY > magY) maxMagY = storeMagY[index];
-        if (maxMagZ < magZ) maxMagZ = storeMagZ[index];
-        // if (!(minMagZ < magZ)) minMagZ = minStoreMagZ[index];
-        break;
-    }
-    checkSound = true;  // limit found
+    PORTB &= ~BIT(3) | BIT(4) | ~BIT(5);
+    _delay_ms(100);  // wait for ports to register
+    DDRB |= BIT(3) | BIT(5);
 }
 
 
-void playNote(bool range, int freq, int16_t gyro)
+void blink(uint16_t delay)
 {
-    if (checkSound) {
-        // if (maxMagZ <= -70 && range) {
-            if (maxDirZ  <= -100 && gyro < 0 && range) {
-                // tone(12, 300, 30);
-                tone(12, freq, 50);
-                checkSound = false;
-            // }
-        }
-    }
-}//*/
+    _delay_ms(delay);
+    PORTB ^= BIT(5);
+}
 
 
-boolean playingDrum = false;
-int16_t totalgyro = 0;
+// /*
+//  *  Store a new acceleration value at the
+//  *  index of the array for every time this
+//  *  function is called.
+//  *  # note:
+//  *    - This functon only loops through once
+//  *      for everytime it is called (due to the
+//  *      break in the loop).
+//  */
+// void storeAcc(int16_t dirX)
+// {
+//     if (index < 30) {
+//         storeMagX[index] = dirX;
+
+//         if (dirX >= 0) {
+//             if (maxMagX <= dirX) maxMagX = storeMagX[index];
+//         } else {
+//             if (minMagX >= dirX) minMagX = storeMagX[index];
+//         }
+//     }
+// }
+
 
 void loop() 
 {
@@ -96,42 +86,89 @@ void loop()
     Magnitude magAcc = magAccel();
 
 
-    //storeAcc(dirAcc.accZ, magAcc.accY, magAcc.accZ, dirAcc.accX);
+    if (!ready) {
+        if ((PINB & BIT(4)) == BIT(4)) ready = true;
+        blink(100);
+        offsetMagX = magAcc.accX;
+        offsetMagY = magAcc.accY;   
+  
+        if (ready) {
+            for (int i = 0; i < 5; i++) blink(400);
+            PORTB &= ~BIT(5);
+        }
 
-    // printData(dirAcc, gyroAcc, magAcc);
+        // addLimit = abs((minMagX + maxMagX) / 2);
+    } else {
+
+
+        //storeAcc(dirAcc.accZ, magAcc.accY, magAcc.accZ, dirAcc.accX);
+
+        // printData(dirAcc, gyroAcc, magAcc);
+        
+        bool detectMagY = (-80 <= magAcc.accY-offsetMagY && magAcc.accY-offsetMagY <= 200);  // Y Magnitude offset (up and down playing motion region)
+
+        if (dirAcc.accZ <= -15 && !playingDrum && detectMagY) {
+            int note = 1;
+
+            if (magAcc.accX-offsetMagX < -150) note = 3;
+            else if (magAcc.accX-offsetMagX > 150) note = 1;
+            else note = 2;
+
+            startPlayback(note);
+            playingDrum = true;
+        } 
+
+        if (dirAcc.accZ >= 2 && playingDrum) {
+            playingDrum = false;
+        }
+
+
+
+    // testSound();
+
+    // if (totalMag < 0) totalMag = magAcc.accX - offsetMag;// - addLimit;
+    // else if (magAcc.accX > 0) totalMag = magAcc.accX - offsetMag;// + addLimit;
+    // else totalMag = magAcc.accX - offsetMag;
+    }
     
-    // bool detectMagY = (5 <= magAcc.accY && magAcc.accY <= 45);  // Y Magnitude offset (up and down playing motion region)
 
-    // if (dirAcc.accZ <= -15 && !playingDrum && detectMagY) {
-    //     int note = 1;
-    //     // if (dirAcc.accX > 10) {
-    //     //     note = 2;
-    //     // } else if (dirAcc.accX < -10) {
-    //     //     note = 3;
-    //     // }
-    //     // printf("YESSSS %d\n", note);
-    //     //tone(12, 100 * note, 50);
-    //     startPlayback(note);
-    //     playingDrum = true;
-    // } 
+    // magAcc.accX = magAcc.accX - offsetMag;
 
-    // if (dirAcc.accZ >= 2 && playingDrum) {
-    //     playingDrum = false;
-    // }
+    // totalMag = magAcc.accX - offsetMag;
 
-    digitalWrite(LEDPIN, HIGH);
-    delay(1000);
-    digitalWrite(LEDPIN, LOW);
-    
-    startPlayback(3);           //this is how you play a sound between 0-3 although i need to change them
-    delay(250);
-    startPlayback(3);
-    delay(500);
-    startPlayback(3);
-    delay(250);
-    startPlayback(1);
 
-    
+    // printf("total    %d  %d %d\n", magAcc.accX, offsetMag, totalMag);
+    // storeAcc(magAcc.accX);
+
+    // for (int i = 0; i < 30; i++) printf("%d ", storeMagX[i]);
+    // printf("max and min    %d %d\n", maxMagX, minMagX);
+
+    // storeAcc(magAcc.accX);
+
+    // for (int i = 0; i < 30; i++) printf("%d ", storeMagX[i]);
+
+    // printf("max and min    %d %d\n", maxMagX, minMagX);
+// accX = magAcc.accX - offsetMag;
+
+    // totalMag = magAcc.accX - offsetMag;
+
+
+
+
+    // storeAcc(magAcc.accX);
+
+    // for (int i = 0; i < 30; i++) printf("%d ", storeMagX[i]);
+
+    // printf("max and min    %d %d\n", maxMagX, minMagX);
+
+
+    // if (index == 30) index = 0;
+    // else index
+
+    // if (index == 30) index = 0;
+    // else index++;
+
+
 
 
     /*

@@ -63,7 +63,8 @@
 volatile unsigned int maxSample = 0;
 volatile unsigned int currentSample = 0;
 
-void stopPlayback() 
+
+void stopPlayback(void) 
 {
   // Disable playback per-sample interrupt.
   TIMSK1 &= ~_BV(OCIE1A);
@@ -94,9 +95,9 @@ ISR(TIMER1_COMPA_vect)
 }
 
 
-void setupPlayback() 
+void setupPlayback(void) 
 {
-  pinMode(SPEAKERPIN, OUTPUT);  //this line is 1/2 lines that matter
+  // pinMode(SPEAKERPIN, OUTPUT);  //this line is 1/2 lines that matter
   // Set up Timer 2 to do pulse width modulation on the speaker
   // pin.
 
@@ -141,7 +142,7 @@ void setupPlayback()
 }
 
 
-void startPlayback(int drum) 
+void startPlayback(int16_t drum) 
 {
   currentSample = 0;
   for (int i = 0; i < drum; i++) {
@@ -174,21 +175,16 @@ void startPlayback(int drum)
 }
 
 
-// void setup() {
-//   //Serial.begin(9600);
-//   pinMode(LEDPIN, OUTPUT);
-//   digitalWrite(LEDPIN, HIGH);
-
-  
-//   setupPlayback();  //this is 2/2 line that matters
-// }
-
-// void loop() {
-//   digitalWrite(LEDPIN, HIGH);
-//   delay(1000);
-//   digitalWrite(LEDPIN, LOW);
-//   startPlayback(3);           //this is how you play a sound between 0-3 although i need to change them
-//   delay(250);startPlayback(3);
-//   delay(500);startPlayback(3);
-//   delay(250);startPlayback(1);
-// }
+void testSound(void) 
+{
+  digitalWrite(LEDPIN, HIGH);
+  delay(1000);
+  digitalWrite(LEDPIN, LOW);
+  startPlayback(3);           //this is how you play a sound between 0-3 although i need to change them
+  delay(250);
+  startPlayback(3);
+  delay(500);
+  startPlayback(3);
+  delay(250);
+  startPlayback(1);
+}

@@ -24,6 +24,9 @@
 
 extern "C" void uartInit(void);
 
+#define BIT(X) (1 << (X))
+
+
 typedef struct DirAcc {
     int accX;
     int accY;

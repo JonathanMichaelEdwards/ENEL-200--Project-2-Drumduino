@@ -9,7 +9,8 @@
 
 void stopPlayback(void);
 void setupPlayback(void);
-void startPlayback(int drum);
+void startPlayback(int16_t drum);
+void testSound(void);
 
 ISR(TIMER1_COMPA_vect);
 

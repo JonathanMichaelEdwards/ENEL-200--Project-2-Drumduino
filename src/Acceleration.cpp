@@ -46,9 +46,9 @@ Magnitude magAccel()
 {
     Magnitude dir = {0};
 
-    dir.accX = (int16_t)IMU.getMagY_uT();
-    dir.accY = (int16_t)IMU.getMagX_uT();
-    dir.accZ = (int16_t)IMU.getMagZ_uT();
+    dir.accX = (int16_t)(IMU.getMagY_uT()*8);
+    dir.accY = (int16_t)(IMU.getMagX_uT()*8);
+    dir.accZ = (int16_t)(IMU.getMagZ_uT()*8);
 
     return dir;
 }

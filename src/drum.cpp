@@ -97,7 +97,7 @@ ISR(TIMER1_COMPA_vect)
 
 void setupPlayback(void) 
 {
-  // pinMode(SPEAKERPIN, OUTPUT);  //this line is 1/2 lines that matter
+  pinMode(SPEAKERPIN, OUTPUT);  //this line is 1/2 lines that matter
   // Set up Timer 2 to do pulse width modulation on the speaker
   // pin.
 
@@ -178,13 +178,13 @@ void startPlayback(int16_t drum)
 void testSound(void) 
 {
   digitalWrite(LEDPIN, HIGH);
-  delay(1000);
-  digitalWrite(LEDPIN, LOW);
-  startPlayback(3);           //this is how you play a sound between 0-3 although i need to change them
-  delay(250);
-  startPlayback(3);
+  startPlayback(0);           //this is how you play a sound between 0-3 although i need to change them
+  delay(500);
+  startPlayback(1);
+  delay(500);
+  startPlayback(2);
   delay(500);
   startPlayback(3);
-  delay(250);
-  startPlayback(1);
+  delay(500);
+  digitalWrite(LEDPIN, LOW);
 }

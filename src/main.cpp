@@ -5,75 +5,84 @@
 // Descr:    Code for the drum duino                                          *
 // ****************************************************************************
 
-
 #include <Arduino.h>
 #include "Acceleration.h"
-#include "uart.h"
+//#include "uart.h" doesn't work for my board no idea why mate
 #include "drum.h"
-
 
 int16_t offsetMagX = 0;
 int16_t offsetMagY = 0;
 bool playingDrum = false;
-bool ready = false;
 int index = 0;
 
-
+void blink(uint16_t delayt)
+{
+    delay(delayt);
+    //PORTB ^= BIT(5);
+    digitalWrite(13, !digitalRead(13));
+}
 /*
  * Sets up everything.
  */
 void setup()
-{   
+{
     accInit();
-    uartInit();
+    //uartInit();
     setupPlayback();
+    testSound();
+    //Serial.begin(9600);
+    //Serial.println("josh is coool");
 
-    PORTB &= ~BIT(3) | BIT(4) | ~BIT(5);
-    _delay_ms(100);  // wait for ports to register
-    DDRB |= BIT(3) | BIT(5);
-}
+    //DDRB |= BIT(3) | BIT(5); not sure what this does will just use pinMode
+    //PORTB &= ~BIT(3) | BIT(4) | ~BIT(5); ?turns all bits as high?
 
-
-void blink(uint16_t delay)
-{
-    _delay_ms(delay);
-    PORTB ^= BIT(5);
-}
-
-
-void loop() 
-{
-    accRun();
+    pinMode(8, INPUT_PULLUP);
+    pinMode(13, OUTPUT);
     
-    Direction dirAcc = dirAccel();
-    Gyro gyroAcc = gyroAccel();
-    Magnitude magAcc = magAccel();
+    delay(50); // wait for ports to register
 
-    if (!ready) {
-        if (PINB & BIT(4)) ready = true;
+    /*while (digitalRead(8) == HIGH)
+    //{
+        Magnitude magAcc = magAccel();
 
         blink(100);
         offsetMagX = magAcc.accX;
-        offsetMagY = magAcc.accY;   
-  
-        if (ready) {
-            for (int i = 0; i < 5; i++) blink(400);
-            PORTB &= ~BIT(5);
-        }
-    } else { 
-        bool detectMagY = (-80 <= magAcc.accY-offsetMagY && magAcc.accY-offsetMagY <= 200);  // Y Magnitude offset (up and down playing motion region)
-
-        if (dirAcc.accZ <= -15 && !playingDrum && detectMagY) {
-            int note = 1;
-
-            if (magAcc.accX-offsetMagX < -150) note = 3;
-            else if (magAcc.accX-offsetMagX > 150) note = 1;
-            else note = 2;
-
-            startPlayback(note);
-            playingDrum = true;
-        } 
-
-        if (dirAcc.accZ >= 2 && playingDrum) playingDrum = false;
+        offsetMagY = magAcc.accY;
+    } //*/
+    for (int i = 0; i < 5; i++)
+    {
+        blink(400);
     }
-} 
+    //PORTB &= ~BIT(5);
+    //Serial.println("Now loop");
+}
+
+void loop()
+{
+    accRun();
+
+    Direction dirAcc = dirAccel();
+    //Gyro gyroAcc = gyroAccel();
+    Magnitude magAcc = magAccel();
+
+    bool detectMagY = true; //(-80 <= magAcc.accY - offsetMagY && magAcc.accY - offsetMagY <= 200); // Y Magnitude offset (up and down playing motion region)
+
+    if ((dirAcc.accZ <= -15 || dirAcc.accZ - abs(dirAcc.accX) <= -20) && !playingDrum && detectMagY)
+    {
+        int note = 1;
+
+        if (dirAcc.accX > 7) //(magAcc.accX - offsetMagX < -150)
+            note = 3;
+        else if (dirAcc.accX < -7) //(magAcc.accX - offsetMagX > 150)
+            note = 1;
+        else
+            note = 2;
+
+        //Serial.println(note);
+        startPlayback(note);
+        playingDrum = true;
+    }
+
+    if (dirAcc.accZ >= 2 && playingDrum)
+        playingDrum = false;
+}

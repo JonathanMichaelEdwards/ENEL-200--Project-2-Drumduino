@@ -1,24 +1,21 @@
 // ****************************************************************************
-// File:     main.c                                                           *
+// File:     main.cpp                                                         *
 // Authors:  Jonathan Edwards, Josh Hogan & William Herewini                  *
-// Date:     12/09/2019                                                       *
+// Date:     25/09/2019                                                       *
 // Descr:    Code for the drum duino                                          *
 // ****************************************************************************
 
 #include <Arduino.h>
 #include "Acceleration.h"
-//#include "uart.h" doesn't work for my board no idea why mate
 #include "drum.h"
 
 int16_t offsetMagX = 0;
 int16_t offsetMagY = 0;
 bool playingDrum = false;
-int index = 0;
 
 void blink(uint16_t delayt)
 {
     delay(delayt);
-    //PORTB ^= BIT(5);
     digitalWrite(13, !digitalRead(13));
 }
 /*
@@ -26,48 +23,35 @@ void blink(uint16_t delayt)
  */
 void setup()
 {
-    accInit();
-    //uartInit();
     setupPlayback();
     testSound();
+    accInit();
+
     //Serial.begin(9600);
-    //Serial.println("josh is coool");
-
-    //DDRB |= BIT(3) | BIT(5); not sure what this does will just use pinMode
-    //PORTB &= ~BIT(3) | BIT(4) | ~BIT(5); ?turns all bits as high?
-
-    pinMode(8, INPUT_PULLUP);
+    //Serial.println("Starting Drum");
     pinMode(13, OUTPUT);
-    
     delay(50); // wait for ports to register
 
-    /*while (digitalRead(8) == HIGH)
-    //{
-        Magnitude magAcc = magAccel();
-
-        blink(100);
-        offsetMagX = magAcc.accX;
-        offsetMagY = magAcc.accY;
-    } //*/
     for (int i = 0; i < 5; i++)
     {
-        blink(400);
+        blink(100);
     }
-    //PORTB &= ~BIT(5);
+    testSound();
     //Serial.println("Now loop");
 }
 
+/*
+Runs over and over again
+*/
 void loop()
 {
     accRun();
 
     Direction dirAcc = dirAccel();
-    //Gyro gyroAcc = gyroAccel();
-    Magnitude magAcc = magAccel();
+    //Gyro gyroAcc = gyroAccel(); //we only use the accelerometer
+    //Magnitude magAcc = magAccel();
 
-    bool detectMagY = true; //(-80 <= magAcc.accY - offsetMagY && magAcc.accY - offsetMagY <= 200); // Y Magnitude offset (up and down playing motion region)
-
-    if ((dirAcc.accZ <= -15 || dirAcc.accZ - abs(dirAcc.accX) <= -20) && !playingDrum && detectMagY)
+    if (dirAcc.accZ <= -15 && !playingDrum)
     {
         int note = 1;
 
